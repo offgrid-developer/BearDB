@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth animations */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(34,197,94,0.6), 0 0 10px rgba(34,197,94,0.4);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(34,197,94,0.8), 0 0 30px rgba(34,197,94,0.6);
+  }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+html, body {
+  font-family: "Inter", system-ui, sans-serif;
+  background: #f8fafc;
+}

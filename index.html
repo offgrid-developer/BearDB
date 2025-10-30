@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bearing Specification Form – Apple+++ Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      /* === GLOBAL STYLES === */
+      body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(145deg, #d7e1ec, #f3f5f7);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+      }
+
+      .card {
+        background: rgba(245, 247, 250, 0.65);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(180, 190, 200, 0.35);
+        box-shadow: 0 4px 40px rgba(180, 190, 200, 0.25);
+      }
+
+      .tracker-ring {
+        position: absolute;
+        bottom: -70px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 140px;
+        background: radial-gradient(circle at 30% 30%, #b1d0e0 0%, #c4d7ed 40%, #e1ecf4 100%);
+        border-radius: 50%;
+        box-shadow: 0 0 35px rgba(170, 200, 230, 0.8),
+          inset 0 0 25px rgba(200, 220, 240, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #5e728e;
+        letter-spacing: 0.5px;
+      }
+
+      select,
+      input {
+        transition: all 0.2s ease-in-out;
+      }
+      select:focus,
+      input:focus {
+        border-color: #a4c8e1;
+        box-shadow: 0 0 0 3px rgba(164, 200, 225, 0.4);
+      }
+
+      button {
+        transition: transform 0.15s ease, box-shadow 0.2s ease;
+      }
+      button:hover {
+        transform: scale(1.03);
+        box-shadow: 0 5px 15px rgba(164, 200, 225, 0.4);
+      }
+
+      /* === 3D Bearing Loader === */
+      #bearingLoader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: radial-gradient(circle at center, #dbe5ee, #f1f4f7 70%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 1s ease, visibility 1s ease;
+      }
+      #bearingLoader.hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .bearing-loader {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        perspective: 800px;
+        animation: floatUpDown 4s ease-in-out infinite alternate;
+      }
+
+      /* Metallic Transparent Bearing Core */
+      .bearing-core {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, rgba(220,230,240,0.8), rgba(150,160,170,0.4));
+        box-shadow:
+          inset 0 0 8px rgba(255,255,255,0.4),
+          inset 0 -3px 6px rgba(90,100,110,0.4),
+          0 0 25px rgba(180,200,210,0.6);
+        backdrop-filter: blur(6px);
+      }
+
+      /* Outer Ring */
+      .bearing-ring {
+        position: absolute;
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: rotateRing 6s linear infinite;
+      }
+
+      /* Micro Transparent Reflective Balls */
+      .bearing-ball {
+        position: absolute;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(190,200,210,0.3));
+        box-shadow:
+          inset 0 0 3px rgba(255,255,255,0.8),
+          inset 0 -1px 2px rgba(60,70,80,0.3),
+          0 0 15px rgba(200,220,240,0.5);
+        backdrop-filter: blur(4px);
+        animation: microSpin 2.5s linear infinite;
+        transform-origin: 80px center;
+      }
+
+      /* Position 8 evenly */
+      .bearing-ball:nth-child(1) { transform: rotate(0deg) translateX(80px); }
+      .bearing-ball:nth-child(2) { transform: rotate(45deg) translateX(80px); }
+      .bearing-ball:nth-child(3) { transform: rotate(90deg) translateX(80px); }
+      .bearing-ball:nth-child(4) { transform: rotate(135deg) translateX(80px); }
+      .bearing-ball:nth-child(5) { transform: rotate(180deg) translateX(80px); }
+      .bearing-ball:nth-child(6) { transform: rotate(225deg) translateX(80px); }
+      .bearing-ball:nth-child(7) { transform: rotate(270deg) translateX(80px); }
+      .bearing-ball:nth-child(8) { transform: rotate(315deg) translateX(80px); }
+
+      /* Glass-like scratches texture effect */
+      .bearing-loader::after {
+        content: "";
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background-image: repeating-linear-gradient(
+          120deg,
+          rgba(255,255,255,0.06) 0px,
+          rgba(255,255,255,0.06) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+        mix-blend-mode: overlay;
+        pointer-events: none;
+        opacity: 0.6;
+      }
+
+      @keyframes rotateRing {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      @keyframes microSpin {
+        from { transform: rotate(0deg) translateX(80px) rotate(0deg); }
+        to { transform: rotate(360deg) translateX(80px) rotate(-360deg); }
+      }
+
+      @keyframes floatUpDown {
+        from { transform: translateY(0); }
+        to { transform: translateY(-12px); }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 🔩 3D Transparent Bearing Loader -->
+    <div id="bearingLoader">
+      <div class="bearing-loader">
+        <div class="bearing-core"></div>
+        <div class="bearing-ring">
+          <div class="bearing-ball"></div>
+          <div class="bearing-ball"></div>
+          <div class="bearing-ball"></div>
+          <div class="bearing-ball"></div>
+          <div class="bearing-ball"></div>
+          <div class="bearing-ball"></div>
+          <div class="bearing-ball"></div>
+          <div class="bearing-ball"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🧭 Main Form -->
+    <div class="relative w-full max-w-2xl">
+      <div class="card rounded-3xl p-10 w-full border border-slate-200 text-slate-700">
+        <h1 class="text-2xl font-semibold text-center mb-8 text-[#4a6078]">
+          Bearing Specification Form
+        </h1>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label class="block mb-2 text-[#5a6e80]">Category</label>
+            <select id="category" class="w-full rounded-xl border border-slate-300 bg-[#f5f7fa] px-4 py-2 outline-none">
+              <option value="">Select Category</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block mb-2 text-[#5a6e80]">Type</label>
+            <select id="type" class="w-full rounded-xl border border-slate-300 bg-[#f5f7fa] px-4 py-2 outline-none" disabled>
+              <option value="">Select Type</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block mb-2 text-[#5a6e80]">Subtype</label>
+            <select id="subtype" class="w-full rounded-xl border border-slate-300 bg-[#f5f7fa] px-4 py-2 outline-none" disabled>
+              <option value="">Select Subtype</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block mb-2 text-[#5a6e80]">Bearing Number / Code</label>
+            <input id="bearingNumber" type="text" class="w-full rounded-xl border border-slate-300 bg-[#f5f7fa] px-4 py-2 outline-none" placeholder="Enter Bearing Number" />
+          </div>
+
+          <div>
+            <label class="block mb-2 text-[#5a6e80]">Seal (Optional)</label>
+            <input id="seal" type="text" class="w-full rounded-xl border border-slate-300 bg-[#f5f7fa] px-4 py-2 outline-none" placeholder="e.g. ZZ, RS" />
+          </div>
+
+          <div>
+            <label class="block mb-2 text-[#5a6e80]">Suffix (Optional)</label>
+            <input id="suffix" type="text" class="w-full rounded-xl border border-slate-300 bg-[#f5f7fa] px-4 py-2 outline-none" placeholder="e.g. C3, NR" />
+          </div>
+
+          <div>
+            <label class="block mb-2 text-[#5a6e80]">Make / Application</label>
+            <input id="make" type="text" class="w-full rounded-xl border border-slate-300 bg-[#f5f7fa] px-4 py-2 outline-none" placeholder="e.g. SKF, Pump Assembly" />
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mt-10">
+          <div class="flex items-center space-x-3">
+            <button id="downloadCSV" class="px-6 py-2 rounded-xl bg-gradient-to-r from-[#a2c2e2] to-[#8eb4da] text-[#2e3e50] font-medium">Download CSV</button>
+            <button id="downloadXLS" class="px-6 py-2 rounded-xl bg-gradient-to-r from-[#a2e2c1] to-[#8edab6] text-[#2e3e50] font-medium">Download Excel</button>
+          </div>
+
+          <button id="resetForm" class="px-5 py-2 bg-[#e6eef3] text-[#4a6078] rounded-xl border border-slate-200">
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <div class="tracker-ring" id="trackerRing">🔵 0 Letters</div>
+    </div>
+
+    <script>
+      const categoryData = {
+        Bearing: {
+          "Deep Groove Ball Bearing": ["6000 Series", "6200 Series", "6300 Series"],
+          "Angular Contact Ball Bearing": ["7000 Series", "7200 Series"],
+          "Self-Aligning Ball Bearing": ["1200 Series", "1300 Series"],
+          "Cylindrical Roller Bearing": ["NU Series", "NJ Series", "NUP Series"],
+          "Spherical Roller Bearing": ["22200 Series", "22300 Series"],
+          "Tapered Roller Bearing": ["30200 Series", "30300 Series"],
+          "Thrust Ball Bearing": ["51100 Series", "51200 Series"],
+        },
+        "Bearing Unit Housing": {
+          "Pillow Block Unit": ["UCP Series", "UCFL Series"],
+          "Flanged Housing Unit": ["UCFC Series", "UCF Series"],
+          "Take-up Housing Unit": ["UCT Series"],
+        },
+        "Bearing Accessory": {
+          "Adapter Sleeves": ["H200 Series", "H300 Series", "H2300 Series", "H3100 Series"],
+          "Withdrawal Sleeves": ["AH200 Series", "AH300 Series", "AH2300 Series", "AH3100 Series"],
+          "Lock Nuts": ["KM Series", "HM Series", "AN Series", "N Series"],
+          "Lock Washers": ["MB Series", "MS Series", "W Series", "AW Series"],
+          "Seals": ["TC Seal", "VC Seal", "CS Seal", "LB Seal"],
+          "End Covers": ["EC200 Series", "EC300 Series", "ECS Series", "ECL Series"],
+        },
+      };
+
+      const categoryEl = document.getElementById("category");
+      const typeEl = document.getElementById("type");
+      const subtypeEl = document.getElementById("subtype");
+      const trackerRing = document.getElementById("trackerRing");
+
+      Object.keys(categoryData).forEach((cat) => {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        categoryEl.appendChild(opt);
+      });
+
+      categoryEl.addEventListener("change", (e) => {
+        const cat = e.target.value;
+        typeEl.innerHTML = '<option value="">Select Type</option>';
+        subtypeEl.innerHTML = '<option value="">Select Subtype</option>';
+        typeEl.disabled = !cat;
+        subtypeEl.disabled = true;
+
+        if (cat) {
+          Object.keys(categoryData[cat]).forEach((type) => {
+            const opt = document.createElement("option");
+            opt.value = type;
+            opt.textContent = type;
+            typeEl.appendChild(opt);
+          });
+        }
+      });
+
+      typeEl.addEventListener("change", (e) => {
+        const cat = categoryEl.value;
+        const type = e.target.value;
+        subtypeEl.innerHTML = '<option value="">Select Subtype</option>';
+        subtypeEl.disabled = !type;
+
+        if (type) {
+          categoryData[cat][type].forEach((st) => {
+            const opt = document.createElement("option");
+            opt.value = st;
+            opt.textContent = st;
+            subtypeEl.appendChild(opt);
+          });
+        }
+      });
+
+      // Download handler with capped tracker
+      function downloadFile(format) {
+        const fields = [
+          categoryEl.value,
+          typeEl.value,
+          subtypeEl.value,
+          document.getElementById("bearingNumber").value,
+          document.getElementById("seal").value,
+          document.getElementById("suffix").value,
+          document.getElementById("make").value,
+        ];
+        const totalLetters = fields.join("").replace(/\s+/g, "").length;
+        const capped = totalLetters > 40 ? 40 : totalLetters;
+        trackerRing.textContent =
+          capped >= 40 ? "⚪ Max Reached" : `🔵 ${capped} / 40 Letters`;
+
+        const content = [
+          ["Category", "Type", "Subtype", "BearingNumber/Code", "Seal", "Suffix", "Make"],
+          fields,
+        ];
+        const blob =
+          format === "csv"
+            ? new Blob([content.map((r) => r.join(",")).join("\n")], { type: "text/csv;charset=utf-8;" })
+            : new Blob([content.map((r) => r.join("\t")).join("\n")], {
+                type: "application/vnd.ms-excel",
+              });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = format === "csv" ? "BearingData.csv" : "BearingData.xls";
+        link.click();
+      }
+
+      document.getElementById("downloadCSV").onclick = () => downloadFile("csv");
+      document.getElementById("downloadXLS").onclick = () => downloadFile("xls");
+
+      document.getElementById("resetForm").onclick = () => {
+        document.querySelectorAll("input").forEach((el) => (el.value = ""));
+        categoryEl.value = "";
+        typeEl.innerHTML = '<option value="">Select Type</option>';
+        subtypeEl.innerHTML = '<option value="">Select Subtype</option>';
+        typeEl.disabled = true;
+        subtypeEl.disabled = true;
+        trackerRing.textContent = "🔵 0 Letters";
+      };
+
+      // Loader fade out on page load
+      window.addEventListener("load", () => {
+        const loader = document.getElementById("bearingLoader");
+        setTimeout(() => loader.classList.add("hidden"), 1500);
+      });
+    </script>
+  </body>
+</html>
